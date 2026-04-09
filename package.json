@@ -1,0 +1,16 @@
+{
+  "name": "design-system",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "description": "",
+  "devDependencies": {
+    "@vanilla-extract/css": "^1.20.1",
+    "@vanilla-extract/esbuild-plugin": "^2.3.22",
+    "esbuild-plugin-copy": "^2.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2"
+  }
+}
