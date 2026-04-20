@@ -28,7 +28,7 @@ function resolveLetterSpacing(spec: TypoSpec, size: typeof SIZES[number]): strin
   return `${percent}%`;
 }
 
-export function generateTokenCss(map: Record<string, TypoSpec>): string {
+export function generateTokenTypo(map: Record<string, TypoSpec>): string {
   const lines: string[] = ['/* AUTO-GENERATED */'];
 
   for (const token in map) {

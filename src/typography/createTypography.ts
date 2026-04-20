@@ -1,4 +1,4 @@
-import { generateTokenCss } from './generateTokenCss';
+import { generateTokenTypo } from './generateTokenCss';
 import type { RequiredTypoTokens, TypoMap, TypoSpec } from './tokens';
 
 const injectedTokens = new Set<string>();
@@ -31,7 +31,7 @@ function injectStyles(map: Record<string, TypoSpec>): void {
   }
   if (!hasNew) return;
 
-  const css = generateTokenCss(newMap);
+  const css = generateTokenTypo(newMap);
   let style = document.querySelector<HTMLStyleElement>(
     'style[data-design-system="typography"]',
   );
