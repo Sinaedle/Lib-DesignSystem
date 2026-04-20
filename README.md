@@ -1,3 +1,16 @@
+
+## Quick Start
+
+```ts
+// Static type token
+import '@sinaedle/design-system/tokens.css';
+
+// Set-up type token
+import { createTypography, createColor } from '@sinaedle/design-system';
+createTypography({ ... });
+createColor({ ... });
+```
+
 ## Typography
 
 Token-based typography. Map semantic tokens to typographic primitives — only the tokens you map get injected as styles.

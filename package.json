@@ -1,6 +1,6 @@
 {
   "name": "@sinaedle/design-system",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "type": "module",
   "files": ["dist", "src/fonts", "src/styles"],
   "main": "./dist/index.js",
@@ -11,7 +11,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./pretendard.css": "./src/styles/pretendard.css"
+    "./pretendard.css": "./src/styles/pretendard.css",
+    "./tokens.css": "./src/styles/tokens.css"
   },
   "scripts": {
     "build:lib": "vite build",
