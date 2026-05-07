@@ -1,4 +1,10 @@
 
+### Install
+
+```bash
+npm install git+https://github.com/Sinaedle/Lib-DesignSystem#1.0.0
+```
+
 ## Quick Start
 
 ```ts

@@ -8,6 +8,7 @@ export type {
   RequiredTypoTokens,
   TypoMap
 } from './typography/tokens';
+export { fontsReady } from './typography/fontsReady';
 // color
 export { createColor } from './color/createColor';
 export { generateTokenColor } from './color/generateTokenCss';
