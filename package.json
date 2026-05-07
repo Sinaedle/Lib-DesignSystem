@@ -22,7 +22,8 @@
     "build:lib": "vite build",
     "build:types": "tsc",
     "build": "npm run build:lib && npm run build:types",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^22",
