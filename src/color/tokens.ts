@@ -11,6 +11,7 @@ export type RequiredColorTokens =
   'main70' |
   'main80' |
   'main90' |
+  'main95' |
   'sub05' |
   'sub10' |
   'sub20' |
@@ -20,7 +21,8 @@ export type RequiredColorTokens =
   'sub60' |
   'sub70' |
   'sub80' |
-  'sub90';
+  'sub90' |
+  'sub95';
 
 export type ThemeNameOf<T> = T extends { setTheme: (theme: infer N) => void } ? N : never;
 export type ColorKeyOf<T> = T extends { colors: Record<infer K, string> } ? K : never;
