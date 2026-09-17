@@ -47,7 +47,7 @@ export const WHITE_ALPHA_LIGHT = {
   whiteAlpha70: '#FFFFFFB3',
   whiteAlpha80: '#FFFFFFCC',
   whiteAlpha90: '#FFFFFFE6',
-};
+} as const;
 
 export const BLACK_ALPHA_LIGHT = {
   blackAlpha05: '#0000000D',
@@ -60,7 +60,7 @@ export const BLACK_ALPHA_LIGHT = {
   blackAlpha70: '#000000B3',
   blackAlpha80: '#000000CC',
   blackAlpha90: '#000000E6',
-};
+} as const;
 
 // Alpha tokens mean "N% black/white" and stay the same in every theme.
 // Reversing them would turn subtle effects (e.g. blackAlpha05 shadows) into strong ones.
