@@ -62,31 +62,12 @@ export const BLACK_ALPHA_LIGHT = {
   blackAlpha90: '#000000E6',
 };
 
-export const WHITE_ALPHA_DARK = {
-  whiteAlpha05: '#FFFFFFE6',
-  whiteAlpha10: '#FFFFFFCC',
-  whiteAlpha20: '#FFFFFFB3',
-  whiteAlpha30: '#FFFFFF99',
-  whiteAlpha40: '#FFFFFF80',
-  whiteAlpha50: '#FFFFFF66',
-  whiteAlpha60: '#FFFFFF4D',
-  whiteAlpha70: '#FFFFFF33',
-  whiteAlpha80: '#FFFFFF1A',
-  whiteAlpha90: '#FFFFFF0D',
-};
+// Alpha tokens mean "N% black/white" and stay the same in every theme.
+// Reversing them would turn subtle effects (e.g. blackAlpha05 shadows) into strong ones.
+// Define theme-aware tokens in the app when a fill should flip between black and white.
+export const WHITE_ALPHA_DARK = WHITE_ALPHA_LIGHT;
 
-export const BLACK_ALPHA_DARK = {
-  blackAlpha05: '#000000E6',
-  blackAlpha10: '#000000CC',
-  blackAlpha20: '#000000B3',
-  blackAlpha30: '#00000099',
-  blackAlpha40: '#00000080',
-  blackAlpha50: '#00000066',
-  blackAlpha60: '#0000004D',
-  blackAlpha70: '#00000033',
-  blackAlpha80: '#0000001A',
-  blackAlpha90: '#0000000D',
-};
+export const BLACK_ALPHA_DARK = BLACK_ALPHA_LIGHT;
 
 // ─────────────────────────────────────────────
 // Semantic State scales
