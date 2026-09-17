@@ -33,9 +33,13 @@ export const createColor = <
     injectStyles(merged);
   }
 
+  let currentTheme = 'light' as ThemeName;
   let current: Record<string, string> = merged.light;
 
+  const getTheme = (): ThemeName => currentTheme;
+
   const setTheme = (theme: ThemeName) => {
+    currentTheme = theme;
     current = merged[theme];
     if (typeof document !== 'undefined') {
       const root = document.documentElement;
@@ -56,7 +60,7 @@ export const createColor = <
     get: (_, key: string) => current[key],
   });
 
-  return { cssVar, colors, setTheme };
+  return { cssVar, colors, getTheme, setTheme };
 };
 
 const injectStyles = (

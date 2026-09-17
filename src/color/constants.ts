@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 export const GREY_SCALE_LIGHT = {
   white:  '#FFFFFF',
-  grey05: '#F7F7F7;', // background color
+  grey05: '#F7F7F7', // background color
   grey10: '#EAEAEA',
   grey20: '#DEDEDE',
   grey30: '#CFCFCF',
