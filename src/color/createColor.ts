@@ -33,23 +33,55 @@ export const createColor = <
     injectStyles(merged);
   }
 
-  let currentTheme = 'light' as ThemeName;
-  let current: Record<string, string> = merged.light;
+  const themeNames: readonly ThemeName[] = Object.freeze(Object.keys(merged) as ThemeName[]);
+  const listeners = new Set<(theme: ThemeName) => void>();
+
+  const isTheme = (value: unknown): value is ThemeName =>
+    typeof value === 'string' && Object.prototype.hasOwnProperty.call(merged, value);
+
+  // Pick up a theme class applied before this runs (e.g. by an inline script in index.html).
+  const detectInitialTheme = (): ThemeName => {
+    if (typeof document === 'undefined') return 'light' as ThemeName;
+    const root = document.documentElement;
+    return themeNames.find((name) => name !== 'light' && root.classList.contains(name))
+      ?? ('light' as ThemeName);
+  };
+
+  let currentTheme = detectInitialTheme();
+  let current: Record<string, string> = merged[currentTheme];
 
   const getTheme = (): ThemeName => currentTheme;
 
   const setTheme = (theme: ThemeName) => {
+    if (!isTheme(theme)) {
+      console.warn(`[design-system] Unknown theme "${String(theme)}". Available: ${themeNames.join(', ')}`);
+      return;
+    }
+
+    const changed = theme !== currentTheme;
     currentTheme = theme;
     current = merged[theme];
+
     if (typeof document !== 'undefined') {
       const root = document.documentElement;
-      (Object.keys(merged) as ThemeName[]).forEach((name) => {
+      themeNames.forEach((name) => {
         root.classList.remove(name);
       });
       if (theme !== 'light') {
         root.classList.add(theme);
       }
     }
+
+    if (changed) {
+      listeners.forEach((listener) => listener(theme));
+    }
+  };
+
+  const onThemeChange = (listener: (theme: ThemeName) => void): (() => void) => {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
   };
 
   const cssVar = new Proxy({} as Record<Keys, string>, {
@@ -60,7 +92,7 @@ export const createColor = <
     get: (_, key: string) => current[key],
   });
 
-  return { cssVar, colors, getTheme, setTheme };
+  return { cssVar, colors, themes: themeNames, isTheme, getTheme, setTheme, onThemeChange };
 };
 
 const injectStyles = (
@@ -71,6 +103,8 @@ const injectStyles = (
     const selector = name === 'light' ? ':root' : `.${name}`;
     css += generateTokenColor(merged[name], selector);
   }
+  // Native UI (scrollbars, form controls) follows the theme. Extra themes inherit `light` from :root.
+  css += ':root {\n  color-scheme: light;\n}\n.dark {\n  color-scheme: dark;\n}\n';
 
   let style = document.querySelector<HTMLStyleElement>(
     'style[data-design-system="color"]',
