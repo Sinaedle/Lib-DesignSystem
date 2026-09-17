@@ -228,17 +228,26 @@ sub05,  sub10,  sub20,  sub30,  sub40,  sub50,  sub60,  sub70,  sub80,  sub90,  
 
 ### Default Tokens
 
-Pre-defined by the package, with separate values for `light` and `dark`:
+Pre-defined by the package:
 
 ```
-white, black
-grey05       – grey95
-whiteAlpha05 – whiteAlpha90
-blackAlpha05 – blackAlpha90
-danger05     – danger95
-success05    – success95
-warning05    – warning95
-info05       – info95
+white, black             ← reversed in dark
+grey05       – grey95    ← reversed in dark
+danger05     – danger95  ← reversed in dark
+success05    – success95 ← reversed in dark
+warning05    – warning95 ← reversed in dark
+info05       – info95    ← reversed in dark
+whiteAlpha05 – whiteAlpha90  ← same in every theme
+blackAlpha05 – blackAlpha90  ← same in every theme
+```
+
+Alpha tokens always mean "N% white/black", so shadows, dimmed backdrops and image overlays look the same in every theme. For a fill that should flip between black and white (e.g. a subtle background tint), add a custom token:
+
+```ts
+// light
+subtleFill: '#0000000D',
+// dark
+subtleFill: '#FFFFFF0D',
 ```
 
 Override any of them per theme:
