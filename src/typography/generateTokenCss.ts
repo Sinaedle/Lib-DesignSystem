@@ -25,7 +25,9 @@ function resolveLetterSpacing(spec: TypoSpec, size: typeof SIZES[number]): strin
     : typeof v === 'number'
       ? v
       : parseFloat(v);
-  return `${percent}%`;
+  // Figma's percent is relative to font-size, which is what `em` means for letter-spacing.
+  // Rounded to avoid float artifacts (e.g. 1.1 / 100 → 0.011000000000000001).
+  return `${parseFloat((percent / 100).toFixed(6))}em`;
 }
 
 export function generateTokenTypo(map: Record<string, TypoSpec>): string {

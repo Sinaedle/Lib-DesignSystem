@@ -25,7 +25,7 @@ import '@sinaedle/design-system/pretendard.css';
 import { createTypography, createColor } from '@sinaedle/design-system';
 
 export const typo = createTypography({ ... });
-export const { cssVar, colors, getTheme, setTheme } = createColor({ ... });
+export const { cssVar, colors, themes, isTheme, getTheme, setTheme, onThemeChange } = createColor({ ... });
 ```
 
 ## Typography
@@ -77,9 +77,13 @@ typo.body1  // 'typo-body1' → use as a class name
 type TypoSpec = {
   primitive: `${TypoSize}-${TypoWeight}`;     // e.g. '14-Regular'
   lineHeight?: '130%' | '140%' | '150%' | '170%';
-  letterSpacing?: `${number}%` | number;
+  letterSpacing?: `${number}%` | number;      // Figma percent (of font-size), e.g. '-1%' or -1
 };
 ```
+
+`letterSpacing` is output in `em` (`-1%` → `-0.01em`), matching Figma. When omitted, a size-based default is used.
+
+`TypoSpec` and `LineHeightPercentage` are exported for typing individual specs.
 
 - `TypoSize`: `160`, `144`, `128`, `112`, `96`, `80`, `72`, `64`, `56`, `48`, `44`, `40`, `36`, `32`, `28`, `26`, `24`, `22`, `20`, `18`, `17`, `16`, `15`, `14`, `13`, `12`, `11`, `10`
 - `TypoWeight`: `Regular`, `Medium`, `SemiBold`, `Bold`, `ExtraBold`
@@ -104,7 +108,7 @@ caption1,     caption2,     caption3
 export const TYPO_MAP = {
   // ...required tokens
   badge:    { primitive: '10-Bold' },
-  overline: { primitive: '12-Medium', letterSpacing: '150%' },
+  overline: { primitive: '12-Medium', letterSpacing: '10%' },
 } as const satisfies TypoMap<'badge' | 'overline'>;
 
 export const typo: Record<RequiredTypoTokens | 'badge' | 'overline', string> = createTypography(TYPO_MAP);
@@ -114,10 +118,15 @@ export const typo: Record<RequiredTypoTokens | 'badge' | 'overline', string> = c
 ### Waiting for Fonts
 
 ```ts
-import { fontsReady } from '@sinaedle/design-system';
+import { waitForFonts } from '@sinaedle/design-system';
 
-await fontsReady;  // resolves when document.fonts is ready (immediately outside the browser)
+await waitForFonts();             // waits for font loads pending at call time
+await waitForFonts('가나다 ABC');  // also starts loading the subsets this text needs
 ```
+
+Pretendard is split by `unicode-range`, so a subset is fetched only when text using it is laid out. Call `waitForFonts()` after rendering, or pass `text` when you need fonts before layout (e.g. measuring text, drawing on canvas). It never rejects and resolves immediately outside the browser.
+
+`fontsReady` is deprecated: it is created at import time and can resolve before the font is loaded.
 
 ## Color
 
@@ -143,7 +152,7 @@ const COLOR_DARK_MAP = {
   // ...
 } as const satisfies ColorMap;
 
-export const { cssVar, colors, getTheme, setTheme } = createColor({
+export const { cssVar, colors, themes, isTheme, getTheme, setTheme, onThemeChange } = createColor({
   light: COLOR_LIGHT_MAP,
   dark: COLOR_DARK_MAP,
 });
@@ -152,15 +161,61 @@ export const { cssVar, colors, getTheme, setTheme } = createColor({
 ### Usage
 
 ```ts
-cssVar.main50     // 'var(--main50)' → use in styles
-colors.main50     // '#3CAAAE'       → value in the current theme
-setTheme('dark')  //                 → switches theme (toggles class on <html>)
-getTheme()        // 'dark'          → current theme name
+cssVar.main50     // 'var(--main50)'    → use in styles
+colors.main50     // '#3CAAAE'          → value in the current theme
+themes            // ['light', 'dark']  → all theme names (readonly)
+isTheme('dark')   // true               → type guard for untrusted strings
+setTheme('dark')  //                    → switches theme (toggles class on <html>)
+getTheme()        // 'dark'             → current theme name
 ```
 
 `light` is the default (no class on `<html>`). Other themes add a matching class (e.g. `<html class="dark">`).
 
-`getTheme()` returns a snapshot, not a reactive value. Wrap it with your framework's state (e.g. a Vue `ref`) if the UI needs to react to theme changes.
+- `setTheme` ignores unknown theme names at runtime and logs a warning.
+- `color-scheme` is set to `dark` for the `dark` theme, so native UI (scrollbars, form controls) follows it. Other themes use `light`.
+- `colors.*` values are fixed at the time of reading. Prefer `cssVar.*` in styles so they follow theme changes.
+
+### Watching Theme Changes
+
+`getTheme()` returns a snapshot. Subscribe to keep UI state in sync:
+
+```ts
+const theme = ref(getTheme());
+const unsubscribe = onThemeChange((next) => { theme.value = next; });
+```
+
+The listener is called only when the theme actually changes.
+
+### Persisting Theme
+
+`isTheme` validates untrusted strings such as a saved value:
+
+```ts
+const stored = localStorage.getItem('theme');
+setTheme(isTheme(stored) ? stored : 'light');
+```
+
+To avoid a flash of the light theme on load, apply the class before the app script runs. `createColor` reads the existing class on `<html>` as the initial theme:
+
+```html
+<!-- index.html, inside <head> -->
+<script>
+  try {
+    const theme = localStorage.getItem('theme');
+    if (theme && theme !== 'light') document.documentElement.classList.add(theme);
+  } catch {}
+</script>
+```
+
+### System Theme
+
+```ts
+import { getSystemTheme, onSystemThemeChange } from '@sinaedle/design-system';
+
+getSystemTheme()  // 'light' | 'dark' → OS preference ('light' outside the browser)
+
+const unsubscribe = onSystemThemeChange((next) => setTheme(next));
+```
 
 ### Required Tokens
 
@@ -250,10 +305,38 @@ type ColorKey  = ColorKeyOf<typeof colorSystem>;   // 'main05' | ... | 'accent'
 ### Utilities
 
 ```ts
-import { hexToRgb, hexToRgba } from '@sinaedle/design-system';
+import { withAlpha, hexToRgb, hexToRgba } from '@sinaedle/design-system';
 
-hexToRgb('#ffffff')        // 'rgb(255, 255, 255)'
-hexToRgba('#e3e3e3', 0.3)  // 'rgba(227, 227, 227, 0.3)'  (alpha is clamped to [0, 1])
+withAlpha(cssVar.main50, 0.3)  // 'color-mix(in srgb, var(--main50) 30%, transparent)'
+hexToRgb('#ffffff')            // 'rgb(255, 255, 255)'
+hexToRgba('#e3e3e3', 0.3)      // 'rgba(227, 227, 227, 0.3)'
 ```
 
-Both return `''` for an invalid HEX string.
+- `withAlpha` works with any CSS color, including CSS variables, so it follows theme changes. Prefer it over `hexToRgba(colors.xxx, ...)`.
+- `hexToRgb` / `hexToRgba` accept 3, 4, 6 and 8-digit HEX and return `''` for invalid input. Alpha in the input is ignored (`hexToRgba` uses its `alpha` argument).
+- Alpha arguments are clamped to `[0, 1]`.
+
+## Radius
+
+Radius tokens are defined as CSS variables in `tokens.css`. Reference them from TS with `radius`:
+
+```ts
+import '@sinaedle/design-system/tokens.css';
+import { radius, RADIUS_TOKENS } from '@sinaedle/design-system';
+import type { RadiusToken } from '@sinaedle/design-system';
+
+radius.m       // 'var(--radius-m)'
+RADIUS_TOKENS  // ['4xs', '3xs', '2xs', 'xs', 's', 'm', 'l', 'xl', '2xl']
+```
+
+| Token | Value |
+|---|---|
+| `4xs` | 2px |
+| `3xs` | 4px |
+| `2xs` | 6px |
+| `xs` | 8px |
+| `s` | 10px |
+| `m` | 12px |
+| `l` | 16px |
+| `xl` | 20px |
+| `2xl` | 24px |
